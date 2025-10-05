@@ -9,6 +9,8 @@ var network = [
 function Prims(network, start) {
     let selected = [start]
     let newNetwork = []
+    newNetwork = Array.from(Array(network.length), () => new Array(network.length).fill(0));
+
     const ptrToElement = (ptr) => {
         let x = ptr % network.length;
         let y = Math.floor(ptr / network.length)
@@ -35,8 +37,42 @@ function Prims(network, start) {
                 }
             }
         }
-        selected.push(lowestPtr % network.length)
+        newNetwork[Math.floor(lowestPtr / newNetwork.length)][lowestPtr % newNetwork.length] = ptrToElement(lowestPtr);
+        newNetwork[lowestPtr % newNetwork.length][Math.floor(lowestPtr / newNetwork.length)] = ptrToElement(lowestPtr);
+        selected.push(lowestPtr % network.length);
     }
     console.log(selected)
+    return newNetwork;
 }
-Prims(network, 3)
+function DisplayNetwork(network) {
+    const canvas = document.getElementById("canvas")
+    const ctx = canvas.getContext("2d")
+    //plotting the points of the network
+    const centreX = 200;
+    const centreY = 200;
+    const radius = 75;
+    const increment = (2 * Math.PI) / network.length;
+    let positions = []
+    for (let i = 0; i < network.length; i++) {
+        const angle = i * increment;
+        let posX = centreX + (radius * Math.sin(angle))
+        let posY = centreY + (radius * Math.cos(angle))
+        ctx.beginPath();
+        ctx.ellipse(posX, posY, 5, 5, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        positions.push([posX, posY])
+    }
+    for (let i = 0; i < network.length; i++) {
+        for (let j = 0; j < network.length; j++) {
+            if (network[i][j] != 0) {
+                ctx.beginPath();
+                ctx.moveTo(positions[i][0], positions[i][1]);
+                ctx.lineTo(positions[j][0], positions[j][1]);
+                ctx.stroke();
+            }
+
+        }
+    }
+
+}
+DisplayNetwork(Prims(network, 3))
